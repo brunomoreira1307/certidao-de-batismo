@@ -4,10 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Declaração de Batismo - Paróquia N. S. do Carmo</title>
+    <!-- Importando a biblioteca jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
+        /* Fonte da página alterada para Georgia / Times */
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Georgia', 'Times New Roman', serif;
             background-color: #f4f4f9;
             color: #333;
             max-width: 800px;
@@ -17,27 +19,19 @@
             border-radius: 8px;
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        .header-ui {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .header-ui img {
-            width: 120px;
-            height: auto;
-            margin-bottom: 10px;
-            display: block;
-            margin-left: auto;
-            margin-right: auto;
-        }
+        .header-ui { text-align: center; margin-bottom: 20px; }
+        .header-ui img { width: 120px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
         h2 { text-align: center; color: #d35400; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: #7f8c8d; margin-top: 0; margin-bottom: 30px; font-weight: bold; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
         .full-width { grid-column: span 2; }
-        label { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block; color: #2c3e50; }
-        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        /* A fonte dos campos também será Georgia para manter o padrão */
+        label { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block; color: #2c3e50; font-family: 'Georgia', serif; }
+        input { font-family: 'Georgia', serif; width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         input:focus { border-color: #d35400; outline: none; }
         button {
+            font-family: 'Georgia', serif;
             width: 100%; padding: 15px; background-color: #d35400; color: white;
             border: none; border-radius: 4px; font-size: 16px; font-weight: bold;
             cursor: pointer; margin-top: 25px; transition: background 0.3s;
@@ -81,11 +75,7 @@
             const { jsPDF } = window.jspdf;
             
             // Forçando documento para A4 com medidas em milímetros
-            const doc = new jsPDF({
-                orientation: "portrait",
-                unit: "mm",
-                format: "a4"
-            });
+            const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
 
             const livro = document.getElementById('livro').value;
             const folha = document.getElementById('folha').value;
@@ -104,65 +94,69 @@
                 return;
             }
 
-            // --- CONFIGURAÇÃO DE MARGENS ---
+            // --- CONFIGURAÇÃO EXATA DE MARGENS ---
             const marginTop = 30;    // 3 cm superior
-            const marginBottom = 20; // 2 cm inferior
             const marginLeft = 30;   // 3 cm esquerda
             const marginRight = 20;  // 2 cm direita
             
-            const pageWidth = 210;   // Largura padrão A4 em mm
-            const contentWidth = pageWidth - marginLeft - marginRight; // 160 mm de área útil de texto
+            const pageWidth = 210;   // Largura A4 em mm
+            const contentWidth = pageWidth - marginLeft - marginRight; // Área útil: 160mm
+            
+            // O novo centro da página, respeitando a assimetria das margens
+            const centerX = marginLeft + (contentWidth / 2); // 110mm
+
+            // Forçando a fonte universal com serifa do PDF (Times)
+            doc.setFont("times");
 
             // --- 1. Inserindo o Brasão ---
             const imgElement = document.getElementById('imgBrasao');
             if (imgElement.complete && imgElement.naturalHeight !== 0) {
-                // Centralizado, alinhado à margem superior (Y = 30)
-                doc.addImage(imgElement, 'PNG', (pageWidth / 2) - 15, marginTop, 30, 30);
+                // Centralizado de acordo com as novas margens
+                doc.addImage(imgElement, 'PNG', centerX - 15, marginTop, 30, 30);
             }
 
-            // --- 2. Cabeçalho (Fonte Times) ---
+            // --- 2. Cabeçalho ---
             doc.setFont("times", "bold");
             doc.setFontSize(14);
-            doc.text("PARÓQUIA DE NOSSA SENHORA DO CARMO", pageWidth / 2, marginTop + 35, { align: "center" });
+            doc.text("PARÓQUIA DE NOSSA SENHORA DO CARMO", centerX, marginTop + 38, { align: "center" });
             
             doc.setFont("times", "italic");
             doc.setFontSize(12);
-            doc.text("Diocese da Campanha", pageWidth / 2, marginTop + 42, { align: "center" });
+            doc.text("Diocese da Campanha", centerX, marginTop + 44, { align: "center" });
 
             doc.setFont("times", "normal");
             doc.setFontSize(11);
-            doc.text("Praça do Carmo, 350 - Centro - Carmo da Cachoeira - MG", pageWidth / 2, marginTop + 48, { align: "center" });
-            doc.text("CEP: 37.225-000", pageWidth / 2, marginTop + 53, { align: "center" });
+            doc.text("Praça do Carmo, 350 - Centro - Carmo da Cachoeira - MG", centerX, marginTop + 50, { align: "center" });
+            doc.text("CEP: 37.225-000", centerX, marginTop + 55, { align: "center" });
 
             // --- 3. Título do Documento ---
             doc.setFont("times", "bold");
             doc.setFontSize(14);
-            doc.text("DECLARAÇÃO DE BATISMO", pageWidth / 2, marginTop + 70, { align: "center" });
+            doc.text("DECLARAÇÃO DE BATISMO", centerX, marginTop + 75, { align: "center" });
 
-            // --- 4. Texto Principal (Tamanho 14) ---
+            // --- 4. Texto Principal ---
             doc.setFont("times", "normal");
             doc.setFontSize(14);
             
             const textoPadrao = `Certifico que, às folhas ${folha} do Livro ${livro} de Registros de Batismos, sob o número ${numero}, encontra-se o registro de ${nome}, nascido(a) aos ${nascimento}, natural de ${naturalidade}, filho(a) de ${pais}. Foi batizado(a) nesta Paróquia aos ${data_batismo}, pelo ${ministro}, tendo como padrinhos ${padrinhos}.`;
 
-            // Configuração com maxWidth garantindo margem direita de 2cm e alinhamento justificado
-            // lineHeightFactor: 1.5 garante o espaçamento entre as linhas solicitado
-            doc.text(textoPadrao, marginLeft, marginTop + 85, { 
+            // Textos justificados DEVEM partir da margem esquerda (X = 30)
+            doc.text(textoPadrao, marginLeft, marginTop + 95, { 
                 maxWidth: contentWidth, 
                 align: "justify",
                 lineHeightFactor: 1.5
             });
 
             // --- 5. Data de Emissão ---
-            // Fica alinhada à direita e um pouco mais para baixo no papel
             const textoData = `Carmo da Cachoeira - MG, ${data_emissao}.`;
-            doc.setFontSize(12); // Reduzimos levemente a fonte da data para elegância
+            doc.setFontSize(12); 
+            // A data vai encostar exatamente na margem direita de 2cm
             doc.text(textoData, pageWidth - marginRight, 200, { align: "right" });
 
             // --- 6. Assinatura ---
-            // Garantindo que fique acima da margem inferior de 2cm (Y máximo = 277)
-            doc.text("___________________________________________________", pageWidth / 2, 240, { align: "center" });
-            doc.text("Pároco", pageWidth / 2, 247, { align: "center" });
+            // Centralizada no eixo de texto
+            doc.text("___________________________________________________", centerX, 240, { align: "center" });
+            doc.text("Pároco", centerX, 247, { align: "center" });
 
             // Baixar o PDF
             doc.save(`Batismo_${nome.replace(/\s+/g, '_')}.pdf`);
