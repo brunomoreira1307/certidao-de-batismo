@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Declaração de Batismo - Paróquia N. S. do Carmo</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f9;
+            color: #333;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        h2, h4 { text-align: center; color: #2c3e50; margin-bottom: 5px; }
+        p.subtitle { text-align: center; color: #7f8c8d; margin-top: 0; margin-bottom: 30px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; }
+        .full-width { grid-column: span 2; }
+        label { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block; }
+        input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        button {
+            width: 100%; padding: 15px; background-color: #2980b9; color: white;
+            border: none; border-radius: 4px; font-size: 16px; font-weight: bold;
+            cursor: pointer; margin-top: 20px; transition: background 0.3s;
+        }
+        button:hover { background-color: #3498db; }
+    </style>
+</head>
+<body>
+
+    <h2>Declaração de Batismo</h2>
+    <p class="subtitle">Paróquia de Nossa Senhora do Carmo | Carmo da Cachoeira - MG</p>
+
+    <div class="grid-3">
+        <div><label>Livro nº</label><input type="text" id="livro" placeholder="Ex: 10"></div>
+        <div><label>Folha nº</label><input type="text" id="folha" placeholder="Ex: 45"></div>
+        <div><label>Registro nº</label><input type="text" id="numero" placeholder="Ex: 120"></div>
+    </div>
+
+    <br>
+
+    <div class="grid">
+        <div class="full-width"><label>Nome do Batizado</label><input type="text" id="nome"></div>
+        <div><label>Data de Nascimento</label><input type="text" id="nascimento" placeholder="Ex: 10/05/2020"></div>
+        <div><label>Naturalidade</label><input type="text" id="naturalidade" placeholder="Ex: Carmo da Cachoeira - MG"></div>
+        <div class="full-width"><label>Nome do Pai e da Mãe</label><input type="text" id="pais"></div>
+        <div class="full-width"><label>Nome dos Padrinhos</label><input type="text" id="padrinhos"></div>
+        <div><label>Data do Batismo</label><input type="text" id="data_batismo" placeholder="Ex: 15/06/2020"></div>
+        <div><label>Ministro (Padre / Diácono)</label><input type="text" id="ministro"></div>
+        <div class="full-width"><label>Data de Emissão do Documento</label><input type="text" id="data_emissao" value="05 de junho de 2026"></div>
+    </div>
+
+    <button onclick="gerarPDF()">Gerar Documento PDF</button>
+
+    <script>
+        function gerarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            // Capturando os dados do formulário
+            const livro = document.getElementById('livro').value;
+            const folha = document.getElementById('folha').value;
+            const numero = document.getElementById('numero').value;
+            const nome = document.getElementById('nome').value;
+            const nascimento = document.getElementById('nascimento').value;
+            const naturalidade = document.getElementById('naturalidade').value;
+            const pais = document.getElementById('pais').value;
+            const padrinhos = document.getElementById('padrinhos').value;
+            const data_batismo = document.getElementById('data_batismo').value;
+            const ministro = document.getElementById('ministro').value;
+            const data_emissao = document.getElementById('data_emissao').value;
+
+            if(!nome || !livro) {
+                alert("Preencha ao menos o Nome e o Livro.");
+                return;
+            }
+
+            // Configurações iniciais
+            const margin = 20;
+            const pageWidth = doc.internal.pageSize.getWidth();
+
+            // Cabeçalho
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(16);
+            doc.text("PARÓQUIA DE NOSSA SENHORA DO CARMO", pageWidth / 2, 25, { align: "center" });
+            
+            doc.setFont("helvetica", "italic");
+            doc.setFontSize(12);
+            doc.text("Diocese da Campanha", pageWidth / 2, 33, { align: "center" });
+
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(11);
+            doc.text("Praça do Carmo, 350 - Centro - Carmo da Cachoeira - MG", pageWidth / 2, 40, { align: "center" });
+            doc.text("CEP: 37.225-000", pageWidth / 2, 46, { align: "center" });
+
+            // Título
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(14);
+            doc.text("DECLARAÇÃO DE BATISMO", pageWidth / 2, 65, { align: "center" });
+
+            // Texto Principal
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(12);
+            
+            const textoPadrao = `Certifico que, às folhas ${folha} do Livro ${livro} de Registros de Batismos, sob o número ${numero}, encontra-se o registro de ${nome}, nascido(a) aos ${nascimento}, natural de ${naturalidade}, filho(a) de ${pais}. Foi batizado(a) nesta Paróquia aos ${data_batismo}, pelo ${ministro}, tendo como padrinhos ${padrinhos}.`;
+
+            // Adiciona o texto com quebra de linha automática e justificado
+            doc.text(textoPadrao, margin, 85, { maxWidth: pageWidth - (margin * 2), align: "justify" });
+
+            // Data de Emissão (Alinhada à direita)
+            const textoData = `Carmo da Cachoeira - MG, ${data_emissao}.`;
+            doc.text(textoData, pageWidth - margin, 130, { align: "right" });
+
+            // Assinatura
+            doc.text("___________________________________________________", pageWidth / 2, 170, { align: "center" });
+            doc.text("Pároco", pageWidth / 2, 178, { align: "center" });
+
+            // Baixar o PDF
+            doc.save(`Batismo_${nome.replace(/\s+/g, '_')}.pdf`);
+        }
+    </script>
+</body>
+</html>
