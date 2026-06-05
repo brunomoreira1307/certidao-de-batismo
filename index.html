@@ -25,6 +25,9 @@
             width: 120px;
             height: auto;
             margin-bottom: 10px;
+            display: block;
+            margin-left: auto;
+            margin-right: auto;
         }
         h2 { text-align: center; color: #d35400; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: #7f8c8d; margin-top: 0; margin-bottom: 30px; font-weight: bold; }
@@ -46,7 +49,7 @@
 <body>
 
     <div class="header-ui">
-        <img id="imgBrasao" src="brasao.jpg" alt="Brasão Paróquia Nossa Senhora do Carmo" crossorigin="anonymous">
+        <img id="imgBrasao" src="brasao.png" alt="Brasão Paróquia Nossa Senhora do Carmo" crossorigin="anonymous">
         <h2>Declaração de Batismo</h2>
         <p class="subtitle">Paróquia de Nossa Senhora do Carmo | Carmo da Cachoeira - MG</p>
     </div>
@@ -76,9 +79,14 @@
     <script>
         function gerarPDF() {
             const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
+            
+            // Forçando documento para A4 com medidas em milímetros
+            const doc = new jsPDF({
+                orientation: "portrait",
+                unit: "mm",
+                format: "a4"
+            });
 
-            // Capturando os dados do formulário
             const livro = document.getElementById('livro').value;
             const folha = document.getElementById('folha').value;
             const numero = document.getElementById('numero').value;
@@ -96,51 +104,67 @@
                 return;
             }
 
-            const margin = 20;
-            const pageWidth = doc.internal.pageSize.getWidth();
-
-            // --- 1. Inserindo o Brasão no PDF ---
-            const imgElement = document.getElementById('imgBrasao');
-            // Posiciona a imagem centralizada no topo. Ajuste o 35, 40 (largura e altura) se necessário.
-            doc.addImage(imgElement, 'JPEG', (pageWidth / 2) - 17.5, 15, 35, 35);
-
-            // --- 2. Cabeçalho (Deslocado para baixo por causa da imagem) ---
-            doc.setFont("helvetica", "bold");
-            doc.setFontSize(16);
-            doc.text("PARÓQUIA DE NOSSA SENHORA DO CARMO", pageWidth / 2, 60, { align: "center" });
+            // --- CONFIGURAÇÃO DE MARGENS ---
+            const marginTop = 30;    // 3 cm superior
+            const marginBottom = 20; // 2 cm inferior
+            const marginLeft = 30;   // 3 cm esquerda
+            const marginRight = 20;  // 2 cm direita
             
-            doc.setFont("helvetica", "italic");
-            doc.setFontSize(12);
-            doc.text("Diocese da Campanha", pageWidth / 2, 68, { align: "center" });
+            const pageWidth = 210;   // Largura padrão A4 em mm
+            const contentWidth = pageWidth - marginLeft - marginRight; // 160 mm de área útil de texto
 
-            doc.setFont("helvetica", "normal");
+            // --- 1. Inserindo o Brasão ---
+            const imgElement = document.getElementById('imgBrasao');
+            if (imgElement.complete && imgElement.naturalHeight !== 0) {
+                // Centralizado, alinhado à margem superior (Y = 30)
+                doc.addImage(imgElement, 'PNG', (pageWidth / 2) - 15, marginTop, 30, 30);
+            }
+
+            // --- 2. Cabeçalho (Fonte Times) ---
+            doc.setFont("times", "bold");
+            doc.setFontSize(14);
+            doc.text("PARÓQUIA DE NOSSA SENHORA DO CARMO", pageWidth / 2, marginTop + 35, { align: "center" });
+            
+            doc.setFont("times", "italic");
+            doc.setFontSize(12);
+            doc.text("Diocese da Campanha", pageWidth / 2, marginTop + 42, { align: "center" });
+
+            doc.setFont("times", "normal");
             doc.setFontSize(11);
-            doc.text("Praça do Carmo, 350 - Centro - Carmo da Cachoeira - MG", pageWidth / 2, 75, { align: "center" });
-            doc.text("CEP: 37.225-000", pageWidth / 2, 81, { align: "center" });
+            doc.text("Praça do Carmo, 350 - Centro - Carmo da Cachoeira - MG", pageWidth / 2, marginTop + 48, { align: "center" });
+            doc.text("CEP: 37.225-000", pageWidth / 2, marginTop + 53, { align: "center" });
 
             // --- 3. Título do Documento ---
-            doc.setFont("helvetica", "bold");
+            doc.setFont("times", "bold");
             doc.setFontSize(14);
-            doc.text("DECLARAÇÃO DE BATISMO", pageWidth / 2, 100, { align: "center" });
+            doc.text("DECLARAÇÃO DE BATISMO", pageWidth / 2, marginTop + 70, { align: "center" });
 
-            // --- 4. Texto Principal ---
-            doc.setFont("helvetica", "normal");
-            doc.setFontSize(12);
+            // --- 4. Texto Principal (Tamanho 14) ---
+            doc.setFont("times", "normal");
+            doc.setFontSize(14);
             
             const textoPadrao = `Certifico que, às folhas ${folha} do Livro ${livro} de Registros de Batismos, sob o número ${numero}, encontra-se o registro de ${nome}, nascido(a) aos ${nascimento}, natural de ${naturalidade}, filho(a) de ${pais}. Foi batizado(a) nesta Paróquia aos ${data_batismo}, pelo ${ministro}, tendo como padrinhos ${padrinhos}.`;
 
-            // Adiciona o texto com quebra de linha automática e justificado
-            doc.text(textoPadrao, margin, 120, { maxWidth: pageWidth - (margin * 2), align: "justify" });
+            // Configuração com maxWidth garantindo margem direita de 2cm e alinhamento justificado
+            // lineHeightFactor: 1.5 garante o espaçamento entre as linhas solicitado
+            doc.text(textoPadrao, marginLeft, marginTop + 85, { 
+                maxWidth: contentWidth, 
+                align: "justify",
+                lineHeightFactor: 1.5
+            });
 
             // --- 5. Data de Emissão ---
+            // Fica alinhada à direita e um pouco mais para baixo no papel
             const textoData = `Carmo da Cachoeira - MG, ${data_emissao}.`;
-            doc.text(textoData, pageWidth - margin, 160, { align: "right" });
+            doc.setFontSize(12); // Reduzimos levemente a fonte da data para elegância
+            doc.text(textoData, pageWidth - marginRight, 200, { align: "right" });
 
             // --- 6. Assinatura ---
-            doc.text("___________________________________________________", pageWidth / 2, 200, { align: "center" });
-            doc.text("Pároco", pageWidth / 2, 208, { align: "center" });
+            // Garantindo que fique acima da margem inferior de 2cm (Y máximo = 277)
+            doc.text("___________________________________________________", pageWidth / 2, 240, { align: "center" });
+            doc.text("Pároco", pageWidth / 2, 247, { align: "center" });
 
-            // Baixar o PDF gerado
+            // Baixar o PDF
             doc.save(`Batismo_${nome.replace(/\s+/g, '_')}.pdf`);
         }
     </script>
