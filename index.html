@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Declaração de Batismo - Paróquia N. S. do Carmo</title>
-    <!-- Importando a biblioteca jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
@@ -139,7 +138,7 @@
                 lineHeightFactor: 1.5
             });
 
-            // Data
+            // Data - Alterado para remover o "- MG"
             const textoData = `Carmo da Cachoeira, ${data_emissao}.`;
             doc.setFontSize(12); 
             doc.text(textoData, pageWidth - marginRight, 200, { align: "right" });
@@ -148,11 +147,8 @@
             doc.text("___________________________________________________", centerX, 240, { align: "center" });
             doc.text("Pároco", centerX, 247, { align: "center" });
 
-            // --- LÓGICA DO NOME DO ARQUIVO ---
-            // Corta o nome digitado usando os espaços e pega apenas a primeira palavra [0]
+            // Lógica do nome do arquivo (Apenas o primeiro nome)
             const primeiroNome = nome.trim().split(/\s+/)[0];
-            
-            // Salva o PDF com o primeiro nome
             doc.save(`Certidao_Batismo_${primeiroNome}.pdf`);
         }
     </script>
