@@ -18,7 +18,8 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .header-ui { text-align: center; margin-bottom: 20px; }
-        .header-ui img { width: 120px; height: auto; margin-bottom: 10px; display: block; margin-left: auto; margin-right: auto; }
+        /* Mostrando uma miniatura do papel timbrado na tela do formulário */
+        .header-ui img { width: 100%; max-width: 300px; height: auto; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px; }
         h2 { text-align: center; color: #d35400; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: #7f8c8d; margin-top: 0; margin-bottom: 30px; font-weight: bold; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -40,9 +41,9 @@
 <body>
 
     <div class="header-ui">
-        <img id="imgBrasao" src="brasao.png" alt="Brasão Paróquia Nossa Senhora do Carmo" crossorigin="anonymous">
+        <img id="imgFundo" src="fundo.jpg" alt="Papel Timbrado" crossorigin="anonymous">
         <h2>Declaração de Batismo</h2>
-        <p class="subtitle">Paróquia de Nossa Senhora do Carmo | Carmo da Cachoeira - MG</p>
+        <p class="subtitle">Preencha os dados para gerar o documento oficial</p>
     </div>
 
     <div class="grid-3">
@@ -62,10 +63,10 @@
         
         <div><label>Data do Batismo</label><input type="text" id="data_batismo" placeholder="Ex: 15/06/2020"></div>
         <div><label>Ministro (Padre / Diácono)</label><input type="text" id="ministro"></div>
-        <div class="full-width"><label>Data de Emissão do Documento</label><input type="text" id="data_emissao" value="05 de junho de 2026"></div>
+        <div class="full-width"><label>Data de Emissão do Documento</label><input type="text" id="data_emissao" value="08 de junho de 2026"></div>
     </div>
 
-    <button onclick="gerarPDF()">Gerar Documento PDF</button>
+    <button onclick="gerarPDF()">Gerar Documento PDF no Papel Timbrado</button>
 
     <script>
         function gerarPDF() {
@@ -90,64 +91,54 @@
                 return;
             }
 
-            // Margens
-            const marginTop = 30;    
+            // Margens para o texto
             const marginLeft = 30;   
             const marginRight = 20;  
-            
             const pageWidth = 210;   
+            const pageHeight = 297;
             const contentWidth = pageWidth - marginLeft - marginRight; 
             const centerX = marginLeft + (contentWidth / 2); 
 
-            doc.setFont("times");
-
-            // Brasão
-            const imgElement = document.getElementById('imgBrasao');
+            // --- 1. APLICANDO O PAPEL TIMBRADO NO FUNDO ---
+            const imgElement = document.getElementById('imgFundo');
             if (imgElement.complete && imgElement.naturalHeight !== 0) {
-                doc.addImage(imgElement, 'PNG', centerX - 15, marginTop, 30, 30);
+                // A imagem cobrirá do ponto 0,0 até 210x297 (A folha A4 inteira)
+                doc.addImage(imgElement, 'JPEG', 0, 0, pageWidth, pageHeight);
             }
 
-            // Cabeçalho
+            doc.setFont("times");
+
+            // --- 2. TÍTULO DO DOCUMENTO ---
+            // Y = 80mm para garantir que fica abaixo do cabeçalho pre-impresso
+            const startY = 80; 
             doc.setFont("times", "bold");
             doc.setFontSize(14);
-            doc.text("PARÓQUIA DE NOSSA SENHORA DO CARMO", centerX, marginTop + 38, { align: "center" });
-            
-            doc.setFont("times", "italic");
-            doc.setFontSize(12);
-            doc.text("Diocese da Campanha", centerX, marginTop + 44, { align: "center" });
+            doc.text("DECLARAÇÃO DE BATISMO", centerX, startY, { align: "center" });
 
-            doc.setFont("times", "normal");
-            doc.setFontSize(11);
-            doc.text("Praça do Carmo, 350 - Centro - Carmo da Cachoeira - MG", centerX, marginTop + 50, { align: "center" });
-            doc.text("CEP: 37.225-000", centerX, marginTop + 55, { align: "center" });
-
-            // Título
-            doc.setFont("times", "bold");
-            doc.setFontSize(14);
-            doc.text("DECLARAÇÃO DE BATISMO", centerX, marginTop + 75, { align: "center" });
-
-            // Texto Principal
+            // --- 3. TEXTO PRINCIPAL ---
             doc.setFont("times", "normal");
             doc.setFontSize(14);
             
             const textoPadrao = `Certifico que, às folhas ${folha} do Livro ${livro} de Registros de Batismos, sob o número ${numero}, encontra-se o registro de ${nome}, nascido(a) aos ${nascimento}, natural de ${naturalidade}, filho(a) de ${pais}. Foi batizado(a) nesta Paróquia aos ${data_batismo}, pelo ${ministro}, tendo como padrinhos ${padrinhos}.`;
 
-            doc.text(textoPadrao, marginLeft, marginTop + 95, { 
+            doc.text(textoPadrao, marginLeft, startY + 20, { 
                 maxWidth: contentWidth, 
                 align: "justify",
                 lineHeightFactor: 1.5
             });
 
-            // Data - Alterado para remover o "- MG"
+            // --- 4. DATA ---
             const textoData = `Carmo da Cachoeira, ${data_emissao}.`;
             doc.setFontSize(12); 
-            doc.text(textoData, pageWidth - marginRight, 200, { align: "right" });
+            // Posicionada na altura de 190mm para não chocar com a assinatura nem o rodapé
+            doc.text(textoData, pageWidth - marginRight, 190, { align: "right" });
 
-            // Assinatura
-            doc.text("___________________________________________________", centerX, 240, { align: "center" });
-            doc.text("Pároco", centerX, 247, { align: "center" });
+            // --- 5. ASSINATURA ---
+            // Posicionada na altura de 230mm (sobra espaço seguro antes do rodapé da imagem)
+            doc.text("___________________________________________________", centerX, 230, { align: "center" });
+            doc.text("Pároco", centerX, 237, { align: "center" });
 
-            // Lógica do nome do arquivo (Apenas o primeiro nome)
+            // --- 6. NOME DO ARQUIVO ---
             const primeiroNome = nome.trim().split(/\s+/)[0];
             doc.save(`Certidao_Batismo_${primeiroNome}.pdf`);
         }
