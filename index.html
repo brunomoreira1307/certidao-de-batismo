@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Declaração de Batismo - Paróquia N. S. do Carmo</title>
-    <!-- Importando a biblioteca jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
@@ -19,7 +18,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .header-ui { text-align: center; margin-bottom: 20px; }
-        /* Estilo para o brasão visível na tela */
         .header-ui img.brasao-tela { width: 120px; height: auto; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; }
         
         h2 { text-align: center; color: #d35400; margin-bottom: 5px; }
@@ -30,23 +28,29 @@
         label { font-weight: bold; font-size: 14px; margin-bottom: 5px; display: block; color: #2c3e50; font-family: 'Georgia', serif; }
         input { font-family: 'Georgia', serif; width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
         input:focus { border-color: #d35400; outline: none; }
+        
+        /* Estilização dos Botões */
+        .btn-container { margin-top: 25px; }
         button {
             font-family: 'Georgia', serif;
-            width: 100%; padding: 15px; background-color: #d35400; color: white;
+            width: 100%; padding: 15px; color: white;
             border: none; border-radius: 4px; font-size: 16px; font-weight: bold;
-            cursor: pointer; margin-top: 25px; transition: background 0.3s;
+            cursor: pointer; margin-bottom: 12px; transition: background 0.3s;
         }
-        button:hover { background-color: #e67e22; }
+        .btn-colorido { background-color: #d35400; }
+        .btn-colorido:hover { background-color: #e67e22; }
+        
+        .btn-branco { background-color: #7f8c8d; }
+        .btn-branco:hover { background-color: #95a5a6; }
+        
         hr { border: 0; height: 1px; background: #eee; margin: 25px 0; }
     </style>
 </head>
 <body>
 
-    <!-- IMAGEM INVISÍVEL NA TELA: Usada apenas para gerar o PDF -->
     <img id="imgFundo" src="fundo.jpg" alt="Papel Timbrado" crossorigin="anonymous" style="display: none;">
 
     <div class="header-ui">
-        <!-- IMAGEM VISÍVEL NA TELA: Apenas para estética do site -->
         <img class="brasao-tela" src="brasao.png" alt="Brasão Paróquia">
         <h2>Declaração de Batismo</h2>
         <p class="subtitle">Preencha os dados para gerar o documento oficial</p>
@@ -72,10 +76,14 @@
         <div class="full-width"><label>Data de Emissão do Documento</label><input type="text" id="data_emissao" value="08 de junho de 2026"></div>
     </div>
 
-    <button onclick="gerarPDF()">Gerar Documento PDF no Papel Timbrado</button>
+    <div class="btn-container">
+        <button class="btn-colorido" onclick="gerarPDF(true)">Gerar PDF com Papel Timbrado (Digital)</button>
+        
+        <button class="btn-branco" onclick="gerarPDF(false)">Gerar PDF em Branco (Para imprimir em papel já timbrado)</button>
+    </div>
 
     <script>
-        function gerarPDF() {
+        function gerarPDF(incluirFundo) {
             const { jsPDF } = window.jspdf;
             
             const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
@@ -97,7 +105,7 @@
                 return;
             }
 
-            // Margens para o texto
+            // Configurações Geométricas e Margens Estritas
             const marginLeft = 30;   
             const marginRight = 20;  
             const pageWidth = 210;   
@@ -105,21 +113,25 @@
             const contentWidth = pageWidth - marginLeft - marginRight; 
             const centerX = marginLeft + (contentWidth / 2); 
 
-            // --- 1. APLICANDO O PAPEL TIMBRADO (fundo.jpg) NO FUNDO DO PDF ---
-            const imgElement = document.getElementById('imgFundo');
-            if (imgElement.complete && imgElement.naturalHeight !== 0) {
-                doc.addImage(imgElement, 'JPEG', 0, 0, pageWidth, pageHeight);
+            // --- 1. CONDIÇÃO DO PAPEL TIMBRADO ---
+            if (incluirFundo) {
+                const imgElement = document.getElementById('imgFundo');
+                if (imgElement.complete && imgElement.naturalHeight !== 0) {
+                    doc.addImage(imgElement, 'JPEG', 0, 0, pageWidth, pageHeight);
+                }
             }
 
+            // Define a família tipográfica clássica do PDF
             doc.setFont("times");
 
             // --- 2. TÍTULO DO DOCUMENTO ---
+            // Y = 80mm preserva o topo exatamente livre (seja digital ou no papel físico)
             const startY = 80; 
             doc.setFont("times", "bold");
             doc.setFontSize(14);
             doc.text("DECLARAÇÃO DE BATISMO", centerX, startY, { align: "center" });
 
-            // --- 3. TEXTO PRINCIPAL ---
+            // --- 3. TEXTO PRINCIPAL (Tamanho 14, Espaçamento 1.5) ---
             doc.setFont("times", "normal");
             doc.setFontSize(14);
             
@@ -140,7 +152,7 @@
             doc.text("___________________________________________________", centerX, 230, { align: "center" });
             doc.text("Pároco", centerX, 237, { align: "center" });
 
-            // --- 6. NOME DO ARQUIVO ---
+            // --- 6. NOME DO ARQUIVO ORGANIZADO ---
             const primeiroNome = nome.trim().split(/\s+/)[0];
             doc.save(`Certidao_Batismo_${primeiroNome}.pdf`);
         }
