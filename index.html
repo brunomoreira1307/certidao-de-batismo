@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Declaração de Batismo - Paróquia N. S. do Carmo</title>
+    <!-- Importando a biblioteca jsPDF -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         body {
@@ -18,8 +19,6 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .header-ui { text-align: center; margin-bottom: 20px; }
-        /* Mostrando uma miniatura do papel timbrado na tela do formulário */
-        .header-ui img { width: 100%; max-width: 300px; height: auto; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 4px; }
         h2 { text-align: center; color: #d35400; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: #7f8c8d; margin-top: 0; margin-bottom: 30px; font-weight: bold; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -40,8 +39,10 @@
 </head>
 <body>
 
+    <!-- A IMAGEM ESTÁ AQUI, MAS INVISÍVEL NA TELA (style="display: none;") -->
+    <img id="imgFundo" src="fundo.jpg" alt="Papel Timbrado" crossorigin="anonymous" style="display: none;">
+
     <div class="header-ui">
-        <img id="imgFundo" src="fundo.jpg" alt="Papel Timbrado" crossorigin="anonymous">
         <h2>Declaração de Batismo</h2>
         <p class="subtitle">Preencha os dados para gerar o documento oficial</p>
     </div>
@@ -102,14 +103,12 @@
             // --- 1. APLICANDO O PAPEL TIMBRADO NO FUNDO ---
             const imgElement = document.getElementById('imgFundo');
             if (imgElement.complete && imgElement.naturalHeight !== 0) {
-                // A imagem cobrirá do ponto 0,0 até 210x297 (A folha A4 inteira)
                 doc.addImage(imgElement, 'JPEG', 0, 0, pageWidth, pageHeight);
             }
 
             doc.setFont("times");
 
             // --- 2. TÍTULO DO DOCUMENTO ---
-            // Y = 80mm para garantir que fica abaixo do cabeçalho pre-impresso
             const startY = 80; 
             doc.setFont("times", "bold");
             doc.setFontSize(14);
@@ -130,11 +129,9 @@
             // --- 4. DATA ---
             const textoData = `Carmo da Cachoeira, ${data_emissao}.`;
             doc.setFontSize(12); 
-            // Posicionada na altura de 190mm para não chocar com a assinatura nem o rodapé
             doc.text(textoData, pageWidth - marginRight, 190, { align: "right" });
 
             // --- 5. ASSINATURA ---
-            // Posicionada na altura de 230mm (sobra espaço seguro antes do rodapé da imagem)
             doc.text("___________________________________________________", centerX, 230, { align: "center" });
             doc.text("Pároco", centerX, 237, { align: "center" });
 
