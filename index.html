@@ -19,6 +19,9 @@
             box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         .header-ui { text-align: center; margin-bottom: 20px; }
+        /* Estilo para o brasão visível na tela */
+        .header-ui img.brasao-tela { width: 120px; height: auto; margin-bottom: 15px; display: block; margin-left: auto; margin-right: auto; }
+        
         h2 { text-align: center; color: #d35400; margin-bottom: 5px; }
         p.subtitle { text-align: center; color: #7f8c8d; margin-top: 0; margin-bottom: 30px; font-weight: bold; }
         .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
@@ -39,10 +42,12 @@
 </head>
 <body>
 
-    <!-- A IMAGEM ESTÁ AQUI, MAS INVISÍVEL NA TELA (style="display: none;") -->
+    <!-- IMAGEM INVISÍVEL NA TELA: Usada apenas para gerar o PDF -->
     <img id="imgFundo" src="fundo.jpg" alt="Papel Timbrado" crossorigin="anonymous" style="display: none;">
 
     <div class="header-ui">
+        <!-- IMAGEM VISÍVEL NA TELA: Apenas para estética do site -->
+        <img class="brasao-tela" src="brasao.png" alt="Brasão Paróquia">
         <h2>Declaração de Batismo</h2>
         <p class="subtitle">Preencha os dados para gerar o documento oficial</p>
     </div>
@@ -100,7 +105,7 @@
             const contentWidth = pageWidth - marginLeft - marginRight; 
             const centerX = marginLeft + (contentWidth / 2); 
 
-            // --- 1. APLICANDO O PAPEL TIMBRADO NO FUNDO ---
+            // --- 1. APLICANDO O PAPEL TIMBRADO (fundo.jpg) NO FUNDO DO PDF ---
             const imgElement = document.getElementById('imgFundo');
             if (imgElement.complete && imgElement.naturalHeight !== 0) {
                 doc.addImage(imgElement, 'JPEG', 0, 0, pageWidth, pageHeight);
